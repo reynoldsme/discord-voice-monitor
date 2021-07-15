@@ -21,8 +21,6 @@ var mxToken = ""
 
 func main() {
 
-	sendMatrixMessage(mxRoom, mxToken, "Discord Voice Monitor booted.")
-
 	viper.SetConfigName("config")
 	viper.SetConfigType("toml")
 	viper.AddConfigPath(".")
@@ -34,6 +32,8 @@ func main() {
 	discordToken = viper.Get("discordToken").(string)
 	mxRoom = viper.Get("mxRoom").(string)
 	mxToken = viper.Get("mxToken").(string)
+
+	sendMatrixMessage(mxRoom, mxToken, "Discord Voice Monitor booted.")
 
 	// Using the matrix-bridge-bot token, enabled "Presence Intent" unclear if that is needed or not
 	discord, err := discordgo.New("Bot " + discordToken)
