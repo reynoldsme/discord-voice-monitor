@@ -1,3 +1,5 @@
 discordtoken = ""
 mxtoken = ""
 mxroom = ""
+friends = []
+activityinterval = 300

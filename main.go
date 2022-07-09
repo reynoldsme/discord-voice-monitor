@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/bwmarrin/discordgo"
 	"github.com/spf13/viper"
 )
@@ -18,6 +19,10 @@ import (
 var discordToken = ""
 var mxRoom = ""
 var mxToken = ""
+var friends []string
+var activityInterval = time.Second * 0
+
+var lastActivityCheck = time.Now().Add(time.Second * -time.Duration(activityInterval))
 
 func main() {
 
@@ -32,6 +37,8 @@ func main() {
 	discordToken = viper.Get("discordToken").(string)
 	mxRoom = viper.Get("mxRoom").(string)
 	mxToken = viper.Get("mxToken").(string)
+	friends = viper.GetStringSlice("friends")
+	activityInterval = time.Duration(viper.GetInt("activityinterval"))
 
 	sendMatrixMessage(mxRoom, mxToken, "Discord Voice Monitor booted.")
 
@@ -69,9 +76,11 @@ func voice(s *discordgo.Session, event *discordgo.VoiceStateUpdate) {
 
 	// ChannelID is populated when joining a voice channel, but not when leaving.
 	if event.ChannelID != "" && (event.BeforeUpdate == nil || (event.VoiceState.SelfMute == event.BeforeUpdate.SelfMute)) {
-		msg := "'" + m.Nick + "' has entered '" + nc.Name + "'"
+		friendStatus := getFriendSteamStatus(friends)
+		msg := "'" + m.Nick + "' has entered '" + nc.Name + "'" + friendStatus
 		sendMatrixMessage(mxRoom, mxToken, msg)
 		fmt.Println(msg)
+		fmt.Println(friends)
 	} else {
 
 		// BeforeUpdate is not populated unless you were listening when the user originally connected.
@@ -120,4 +129,33 @@ func sendMatrixMessage(mxRoom string, mxToken string, msg string) int {
 		panic(err)
 	}
 	return resp.StatusCode
+}
+
+// getFriendSteamStatus takes a slice of friend steam ids and returns a formatted list who is playing what
+func getFriendSteamStatus(friends []string) string {
+
+	games := ""
+
+	for _, friend := range friends {
+		if time.Now().Sub(lastActivityCheck) >= activityInterval {
+			response, err := http.Get("https://steamcommunity.com/id/" + friend)
+			if err != nil {
+				fmt.Println("Failed to request steam in-game status for " + friend)
+				continue
+			}
+			defer response.Body.Close()
+			doc, _ := goquery.NewDocumentFromReader(response.Body)
+			doc.Find(".profile_in_the_game_name").Each(func(i int, s *goquery.Selection) {
+				game := s.Find("div").Text()
+				if game != "" {
+					games += friend + " is playing: " + game + "\n"
+				}
+				//}
+
+			})
+			//fmt.Println(games)
+		}
+	}
+
+	return games
 }
