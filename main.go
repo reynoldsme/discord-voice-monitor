@@ -68,7 +68,7 @@ func voice(s *discordgo.Session, event *discordgo.VoiceStateUpdate) {
 	nc, _ := s.Channel(event.ChannelID)
 
 	// ChannelID is populated when joining a voice channel, but not when leaving.
-	if event.ChannelID != "" {
+	if event.ChannelID != "" && (event.BeforeUpdate == nil || (event.VoiceState.SelfMute == event.BeforeUpdate.SelfMute)) {
 		msg := "'" + m.Nick + "' has entered '" + nc.Name + "'"
 		sendMatrixMessage(mxRoom, mxToken, msg)
 		fmt.Println(msg)
