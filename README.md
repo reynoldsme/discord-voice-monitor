@@ -2,6 +2,14 @@
 
 This application monitors one or more discord guilds and notifies a non e2e encrypted matrix protocol chat room when someone joins any voice channel. If "friends" are specified, the monitor will also output what if any games the listed friends are playing on the Valve Steam platform.
 
+## Why?
+
+Discord doesn't natively offer a way to notify you when someone joins a voice channel, so unless you are actively watching Steam / Discord or people are actively pinging you, it can be difficult to know when a spontaneously group gaming session has materialized while away from your desktop.
+
+This provides an easy way of knowing what's up from any matrix protocol enabled device.
+
+## Configuration
+
 configuration is supplied with a `config.toml` file which accepts the following key-values:
 
 * `discordtoken` the discord bot token to use. The application will report voice channel join events for every voice channel in every guild the bot has access to.
