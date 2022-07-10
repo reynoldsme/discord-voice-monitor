@@ -20,9 +20,9 @@ var discordToken = ""
 var mxRoom = ""
 var mxToken = ""
 var friends []string
-var activityInterval = time.Second * 0
+var activityInterval = time.Duration(time.Second * 0)
 
-var lastActivityCheck = time.Now().Add(time.Second * -time.Duration(activityInterval))
+var lastActivityCheck = time.Now().Add(time.Second * time.Duration(-activityInterval))
 
 func main() {
 
@@ -38,7 +38,7 @@ func main() {
 	mxRoom = viper.Get("mxRoom").(string)
 	mxToken = viper.Get("mxToken").(string)
 	friends = viper.GetStringSlice("friends")
-	activityInterval = time.Duration(viper.GetInt("activityinterval"))
+	activityInterval = time.Duration(viper.GetInt("activityinterval")) * time.Second
 
 	sendMatrixMessage(mxRoom, mxToken, "Discord Voice Monitor booted.")
 
@@ -53,7 +53,7 @@ func main() {
 	discord.Identify.Intents = discordgo.IntentsGuildVoiceStates
 	err = discord.Open()
 	if err != nil {
-		fmt.Println("error opening connection:", err)
+		fmt.Println("Error opening connection:", err)
 		return
 	}
 	discord.AddHandler(voice)
@@ -77,10 +77,10 @@ func voice(s *discordgo.Session, event *discordgo.VoiceStateUpdate) {
 	// ChannelID is populated when joining a voice channel, but not when leaving.
 	if event.ChannelID != "" && (event.BeforeUpdate == nil || (event.VoiceState.SelfMute == event.BeforeUpdate.SelfMute)) {
 		friendStatus := getFriendSteamStatus(friends)
-		msg := "'" + m.Nick + "' has entered '" + nc.Name + "'" + friendStatus
+		msg := "'" + m.Nick + "' has entered '" + nc.Name + "'\n" + friendStatus
 		sendMatrixMessage(mxRoom, mxToken, msg)
 		fmt.Println(msg)
-		fmt.Println(friends)
+		//fmt.Println(friends)
 	} else {
 
 		// BeforeUpdate is not populated unless you were listening when the user originally connected.
@@ -135,27 +135,30 @@ func sendMatrixMessage(mxRoom string, mxToken string, msg string) int {
 func getFriendSteamStatus(friends []string) string {
 
 	games := ""
+	delta := time.Now().Sub(lastActivityCheck)
 
-	for _, friend := range friends {
-		if time.Now().Sub(lastActivityCheck) >= activityInterval {
+	if delta >= activityInterval {
+		lastActivityCheck = time.Now()
+		for _, friend := range friends {
+
 			response, err := http.Get("https://steamcommunity.com/id/" + friend)
+			//response, err := http.Get("https://leptco.com/steam.html")
 			if err != nil {
 				fmt.Println("Failed to request steam in-game status for " + friend)
 				continue
 			}
 			defer response.Body.Close()
 			doc, _ := goquery.NewDocumentFromReader(response.Body)
-			doc.Find(".profile_in_the_game_name").Each(func(i int, s *goquery.Selection) {
-				game := s.Find("div").Text()
+			doc.Find(".profile_in_game_name").Each(func(i int, s *goquery.Selection) {
+				game := s.Text()
 				if game != "" {
-					games += friend + " is playing: " + game + "\n"
+					games += "* " + friend + " is playing: " + game + "\n"
 				}
-				//}
 
 			})
-			//fmt.Println(games)
+
 		}
 	}
-
+	fmt.Println(games)
 	return games
 }
