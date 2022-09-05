@@ -18,3 +18,14 @@ configuration is supplied with a `config.toml` file which accepts the following 
 * `friends` a list of Steam profile ids to check for active games. **This only works for users with game activity set to public**. No steam auth needed.
 * `activityinterval` the minimum number of seconds between checking friends steam game activity. Higher numbers decrease message verbosity and decreases the number of requests to steam.
 
+### Running as a Service
+
+To run discord-voice-monitor as a service on systems running the systemd init system:
+
+1. Clone and build the project to `/opt/discord-voice-monitor/`
+2. copy `config.toml.dist` to `config.toml` and customize the settings as appropriate.
+3. run `./add-service.sh` to add the service to systemd and start running the application.
+
+### Logging
+
+Basic logs will be printed to stdout and will be available via `journalctl -f -u discord-voice-monitor.service` when running via systemd.
