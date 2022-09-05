@@ -1,0 +1,17 @@
+[Unit]
+Description=Discord Voice Monitor
+Documentation=https://github.com/reynoldsme/discord-voice-monitor
+After=network.target matrix-synapse.service
+
+[Service]
+
+WorkingDirectory=/opt/discord-voice-monitor
+
+Type=simple
+User=ubuntu
+
+ExecStart=/opt/discord-voice-monitor/discord-voice-monitor
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
