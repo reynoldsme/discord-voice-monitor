@@ -4,7 +4,7 @@ This application monitors one or more discord guilds and notifies a non e2e encr
 
 ## Why?
 
-Discord doesn't natively offer a way to notify you when someone joins a voice channel, so unless you are actively watching Steam / Discord or people are actively pinging you, it can be difficult to know when a spontaneously group gaming session has materialized while away from your desktop.
+Discord doesn't natively offer a way to notify you when someone joins a voice channel, so unless you are actively watching Steam / Discord or people are actively pinging you, it can be difficult to know when a spontaneous group gaming session has materialized while away from your desktop.
 
 This provides an easy way of knowing what's up from any matrix protocol enabled device.
 
