@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -150,7 +151,7 @@ func getFriendSteamStatus(friends []string) string {
 			defer response.Body.Close()
 			doc, _ := goquery.NewDocumentFromReader(response.Body)
 			doc.Find(".profile_in_game_name").Each(func(i int, s *goquery.Selection) {
-				game := s.Text()
+				game := strings.ReplaceAll(strings.ReplaceAll(s.Text(), "\n", ""), "\t", "")
 				if game != "" {
 					games += "* " + friend + " is playing: " + game + "\n"
 				}
