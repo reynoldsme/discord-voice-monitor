@@ -78,7 +78,7 @@ func voice(s *discordgo.Session, event *discordgo.VoiceStateUpdate) {
 	// ChannelID is populated when joining a voice channel, but not when leaving.
 	if event.ChannelID != "" && (event.BeforeUpdate == nil || (event.VoiceState.SelfMute == event.BeforeUpdate.SelfMute)) {
 		friendStatus := getFriendSteamStatus(friends)
-		msg := "'" + m.Nick + "' has entered '" + nc.Name + "'\n" + friendStatus
+		msg := "'" + m.Nick + "' has entered '" + nc.Name + friendStatus
 		sendMatrixMessage(mxRoom, mxToken, msg)
 		fmt.Println(msg)
 		//fmt.Println(friends)
@@ -153,7 +153,7 @@ func getFriendSteamStatus(friends []string) string {
 			doc.Find(".profile_in_game_name").Each(func(i int, s *goquery.Selection) {
 				game := strings.ReplaceAll(strings.ReplaceAll(s.Text(), "\n", ""), "\t", "")
 				if game != "" {
-					games += "* " + friend + " is playing: " + game + "\n"
+					games += "\n* " + friend + " is playing: " + game
 				}
 
 			})
